@@ -1,3 +1,4 @@
+from matplotlib.pyplot import title
 import pygame
 import random
 import math
@@ -8,11 +9,10 @@ class DrawInformation:
   WHITE = 255,255,255
   GREEN = 0,255,0
   RED = 255,0,0
-  GREY = 128,128,128
   BACKGROUND_COLOR = WHITE
 
   GRADIENTS = [
-    GREY,
+    (128, 128, 128),
     (160, 160, 160),
     (192, 192, 192)
   ]
@@ -37,20 +37,27 @@ class DrawInformation:
     self.max_val = max(lst)
 
     self.block_width = round((self.width - self.SIDE_PAD) / len(lst))
-    self.block_height = math.floor((self.height - self.TOP_PAD) / (self.max_val - self.min_val))
+    self.block_height = math.floor(
+        (self.height - self.TOP_PAD) / (self.max_val - self.min_val))
     self.start_x = self.SIDE_PAD // 2
   
 
-def draw(draw_info):
+def draw(draw_info, algo_name, ascending):
   draw_info.window.fill(draw_info.BACKGROUND_COLOR)
 
+  title = draw_info.FONT.render(
+      f"{algo_name} - {'Ascending' if ascending else 'Descending'}", 1, draw_info.BLACK)
+  draw_info.window.blit(
+      title, (draw_info.width/2 - title.get_width()/2, 5))
+
+
   controls = draw_info.FONT.render("R - Reset | SPACE - Start Sorting | A - Ascending | D - Descending", 1, draw_info.BLACK)
-  draw_info.window.blit(controls, (draw_info.width/2 - controls.get_width()/2,5))
+  draw_info.window.blit(controls, (draw_info.width/2 - controls.get_width()/2, 35))
 
   sorting = draw_info.FONT.render(
       "I - Insertion Sort | B - Bubble Sort", 1, draw_info.BLACK)
   draw_info.window.blit(
-      sorting, (draw_info.width/2 - sorting.get_width()/2, 35))
+      sorting, (draw_info.width/2 - sorting.get_width()/2, 65))
 
   draw_list(draw_info)
   pygame.display.update()
@@ -72,7 +79,8 @@ def draw_list(draw_info, color_positions = {}, clear_bg = False):
     if i in color_positions:
       color = color_positions[i]
   
-    pygame.draw.rect(draw_info.window, color, (x, y, draw_info.block_width, draw_info.block_height))
+    pygame.draw.rect(draw_info.window, color,
+                     (x, y, draw_info.block_width, draw_info.height))
 
   if clear_bg:
     pygame.display.update()
@@ -119,7 +127,7 @@ def main():
   sorting_algorithm_generator = None
 
   while run:
-    clock.tick(60)
+    clock.tick(120)
 
     if sorting:
       try:
@@ -128,12 +136,8 @@ def main():
         sorting = False
     
     else:
-      draw(draw_info)
-
-    draw(draw_info)
-
-    pygame.display.update()
-
+      draw(draw_info, sorting_algo_name, ascending)
+      
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
         run = False
